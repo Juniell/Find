@@ -1,33 +1,28 @@
 import org.junit.Test;
-
 import java.io.File;
-
 import static org.junit.Assert.*;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class FindTest {
-
-    @Test
-    public void analysis() {
-        assertEquals(Find.analysis("find [-d directory] filename.txt"), 1);         // Без [-r]
-        assertEquals(Find.analysis("find [-r] [-d directory] filename.txt"), 2);    // С [-r]
-        assertThrows(IllegalArgumentException.class, () -> Find.analysis("find"));  // Исключение
-    }
+    private String dir = new File("").getAbsolutePath();
+    private Find find1 = new Find(false, dir + File.separator + "input" + File.separator + "folder1" + File.separator + "empty folder", "test.txt");
+    private Find find2 = new Find(true, null, "test2");
+    private Find find3 = new Find(false, dir + File.separator + "input" + File.separator + "folder1", "test1.txt");
+    private Find find4 = new Find(true, dir + File.separator + "input", "test1.txt");
+    private Find find5 = new Find(true, null, "test.txt");
 
     @Test
     public void search() {
-        assertEquals(Find.search("find [-d " + new File("").getAbsolutePath() + "\\src\\main\\java] Find.java", 1), "Файл найден.");
-        assertEquals(Find.search("find [-r] [-d " + new File("").getAbsolutePath() + "\\src] FindTest.java", 2), "Файл найден.");
-        assertEquals(Find.search("find Find.iml", 3), "Файл найден.");
-        assertEquals(Find.search("find nonexistent.txt", 3), "Файл не найден.");
-        assertEquals(Find.search("find [-r] test1.txt", 4), "Файл найден.");
-        assertEquals(Find.search("find [-r] nonexistent.txt", 4), "Файл не найден.");
-    }
-
-    @Test
-    public void second() {
-        assertTrue(Find.second(new File("").getAbsolutePath() + "\\src", "FindTest.java"));
-        assertTrue(Find.second(new File("").getAbsolutePath(), "test1.txt"));
-        assertTrue(Find.second(new File("").getAbsolutePath(), "Find.iml"));
+        // 1) Поиск в пустой директории, т.е. поиск файла, которого заведомо нет в этой директории
+        assertEquals("Файл не найден.", find1.search());
+        // 2) Поиск по всем поддиректориям файла, которого заведомо нет
+        assertEquals("Файл не найден.", find2.search());
+        // 3) Поиск в определённой директории без поиска в поддиректориях
+        assertEquals("Файл найден: " + dir + File.separator + "input" + File.separator + "folder1" + File.separator + "test1.txt", find3.search());
+        // 4) Поиск в определённой директории с поиском в поддиректориях единственного файла
+        assertEquals("Файл найден: " + dir + File.separator + "input" + File.separator + "folder1" + File.separator + "test1.txt", find4.search());
+        // 5) Поиск без указания директории с поиском в поддиректориях файла, который встречается несколько раз
+        assertEquals("Найденные файлы:\n" +
+                dir + File.separator + "input" + File.separator + "folder1" + File.separator + "test.txt\n" +
+                dir + File.separator + "input" + File.separator + "folder2" + File.separator + "test.txt", find5.search());
     }
 }
